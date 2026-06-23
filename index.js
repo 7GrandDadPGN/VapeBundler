@@ -3,19 +3,30 @@ const path = require('node:path');
 const processGame = require('./helpers/processGame.js');
 const processUI = require('./helpers/processUI.js');
 const { SRC_PATH, DEV_PATH, PROD_PATH } = require('./config.json');
-const vars = require('./helpers/vars.js');
+const { VARS, makePath } = require('./helpers/vars.js');
 const { Command } = require('@cliffy/command');
 
-function main(isDev, main, games) {
+function main(isDev, buildMain, buildGames) {
 	console.log('\x1b[33mVape Bundler Started!\nDeveloped & maintained by 7GrandDad (https://youtube.com/c/7GrandDadVape)\x1b[0m');
 
 	const timeTaken = Date.now();
 	const DEST_PATH = isDev ? DEV_PATH : PROD_PATH;
-	vars.VARS.IS_DEV = isDev;
-	vars.VARS.DEST_PATH = DEST_PATH;
-	console.log(vars.VARS.DEST_PATH);
+	VARS.IS_DEV = isDev;
+	VARS.DEST_PATH = DEST_PATH;
 
-	if (main) {
+	// create folders
+	for (const basePath of [
+		DEST_PATH,
+		path.join(DEST_PATH, 'assets'),
+		path.join(DEST_PATH, 'libraries'),
+		path.join(DEST_PATH, 'games'),
+		path.join(DEST_PATH, 'guis')
+	]) {
+		makePath(basePath);
+	}
+
+	// build main files, libraries, and gui libraries
+	if (buildMain) {
 		console.log('\x1b[36m[*] Copying main files...\x1b[0m');
 		fs.copyFileSync(path.join(SRC_PATH, 'loader.lua'), path.join(DEST_PATH, 'loader.lua'));
 		fs.copyFileSync(path.join(SRC_PATH, 'main.lua'), path.join(DEST_PATH, 'main.lua'));
@@ -33,7 +44,8 @@ function main(isDev, main, games) {
 		}
 	}
 
-	if (games) {
+	// build all game files
+	if (buildGames) {
 		console.log('\x1b[36m[*] Building games...\x1b[0m');
 		const GAMES_PATH = path.join(SRC_PATH, 'games');
 		for (const game of fs.readdirSync(GAMES_PATH)) {
