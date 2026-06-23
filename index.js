@@ -22,6 +22,7 @@ function main(isDev, buildMain, buildGames) {
 		path.join(DEST_PATH, 'games'),
 		path.join(DEST_PATH, 'guis')
 	]) {
+		console.log('path', DEST_PATH);
 		makePath(basePath);
 	}
 
